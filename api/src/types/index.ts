@@ -15,6 +15,9 @@ export interface CreateBusinessInput {
 }
 
 
-export interface CreateInvoiceInput{
-    
+export interface CreateInvoiceInput {
+    clientId?: string;
+    dueDate: string;
+    items: { description: string; qty: number; price: number; taxRate?: number; discount?: number }[];
+    notes: string;
 }
