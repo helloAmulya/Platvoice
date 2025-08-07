@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEONDB_URL")
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String // hashed passwords (to be handled with JWT later)
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  business  Business? @relation(fields: [id], references: [adminId]) // one user per business, adminId is unique
+  @@index([email])
+}
+
+model Business {
+  id        String   @id @default(uuid())
+  name      String // company/shop name
+  address   String?
+  phone     String?
+  email     String?
+  logo      String? // logo url for invoices
+  currency  String   @default("INR") // default for local shops
+  adminId   String   @unique
+  admin     User     @relation(fields: [adminId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  invoices  Invoice[]
+  clients   Client[]
+  @@index([adminId])
+}
+
+model Client {
+  id         String   @id @default(uuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id])
+  name       String // for local shops
+  phone      String?
+  email      String?
+  address    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  invoices   Invoice[]
+  @@index([businessId])
+}
+
+model Invoice {
+  id         String        @id @default(uuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id])
+  clientId   String?
+  client     Client?       @relation(fields: [clientId], references: [id])
+  invoiceNum String        @unique // auto-generated 
+  issueDate  DateTime      @default(now())
+  dueDate    DateTime
+  subtotal   Float
+  tax        Float         @default(0)
+  discount   Float         @default(0)
+  total      Float
+  currency   String        @default("INR")
+  status     String        @default("draft") // ex - "draft", "sent", "paid"
+  notes      String?
+  sentAt     DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  items      InvoiceItem[]
+  @@index([businessId, invoiceNum])
+}
+
+model InvoiceItem {
+  id          String   @id @default(uuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id])
+  description String
+  qty         Int
+  price       Float
+  taxRate     Float?   @default(0)
+  discount    Float?   @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@index([invoiceId])
+}
