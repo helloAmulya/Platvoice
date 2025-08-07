@@ -9,6 +9,8 @@ import { email, includes } from "zod";
 
 
 export const createInvoice = async (businessId: string, data: CreateInvoiceInput) => {
+        // after adding zod to the types/index.ts, add the parse here to get the valid data
+
 
 
     // first see what is needed to be defined here by the schema, then create those values which will be auto created, then pass the other values. 

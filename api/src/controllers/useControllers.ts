@@ -6,6 +6,10 @@ import jwt from "jsonwebtoken";
 import type { CreateUserInput } from "../types/index.js"
 
 export const createUser = async (data: CreateUserInput) => {
+
+
+    // after adding zod to the types/index.ts, add the parse here to get the valid data
+
     const existingUser = await prisma.user.findUnique({
         where: { email: data.email },
     });

@@ -1,4 +1,6 @@
 
+// add the zod schema here
+
 export interface CreateUserInput {
     email: string;
     password: string;
